@@ -16,7 +16,7 @@ Python ile geliştirilmiş, sesli komutları algılayarak bilgisayar üzerinde �
 
 ## 🛠️ Kullanılan Teknolojiler
 
-* **Python**[cite: 1, 2, 4, 5, 6, 7]
+* **Python**
 * `SpeechRecognition` (Google Speech API)
 * `pyttsx3` & `gTTS` (Metinden Sese Çeviri)
 * `pygame` (Ses Yönetimi)
