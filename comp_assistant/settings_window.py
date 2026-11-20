@@ -46,7 +46,16 @@ def show_settings(settings: Settings, on_save: Callable[[Settings], None]) -> No
                     site = validate_site(raw_site)
                     if site not in sites:
                         sites.append(site)
-            updated = Settings(command_wait_seconds=seconds, websites=sites)
+            updated = Settings(
+                command_wait_seconds=seconds,
+                websites=sites,
+                sample_rate=settings.sample_rate,
+                channels=settings.channels,
+                block_size=settings.block_size,
+                input_device=settings.input_device,
+                dtype=settings.dtype,
+                vosk_model_directory=settings.vosk_model_directory,
+            )
             updated.save()
             on_save(updated)
         except ValueError as error:

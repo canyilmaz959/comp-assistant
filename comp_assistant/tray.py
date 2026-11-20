@@ -4,13 +4,38 @@ from __future__ import annotations
 import threading
 
 from .config import Settings
+from .microphone import MicrophoneManager
 from .runtime import AssistantRuntime
+from .voice import AudioService, MockSpeechSynthesizer, MockWakeWordDetector
+from .vosk_recognizer import VoskSpeechRecognizer
 
 
 class CompAssistantApp:
     def __init__(self) -> None:
         self.settings = Settings.load()
-        self.runtime = AssistantRuntime(self.settings.command_wait_seconds)
+        self.microphone_manager = MicrophoneManager(
+            sample_rate=self.settings.sample_rate,
+            channels=self.settings.channels,
+            block_size=self.settings.block_size,
+            input_device=self.settings.input_device,
+            dtype=self.settings.dtype,
+        )
+        self.audio_service = AudioService(
+            MockWakeWordDetector(),
+            VoskSpeechRecognizer(
+                self.microphone_manager,
+                self.settings.vosk_model_directory,
+                sample_rate=self.settings.sample_rate,
+                dtype=self.settings.dtype,
+                channels=self.settings.channels,
+            ),
+            MockSpeechSynthesizer(),
+        )
+        self.runtime = AssistantRuntime(
+            self.settings.command_wait_seconds,
+            audio_service=self.audio_service,
+            microphone_manager=self.microphone_manager,
+        )
         self.icon = None
 
     def run(self) -> None:
