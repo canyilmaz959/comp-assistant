@@ -24,6 +24,7 @@ class CompAssistantApp:
             ) from error
 
         menu = pystray.Menu(
+            pystray.MenuItem("Uygulama bul ve aç", self._open_apps),
             pystray.MenuItem("Ayarlar", self._open_settings),
             pystray.MenuItem(
                 "Asistan etkin",
@@ -47,6 +48,15 @@ class CompAssistantApp:
         draw.ellipse((5, 5, 59, 59), fill=(27, 190, 170))
         draw.text((22, 18), "C", fill=(18, 28, 42))
         return image
+
+    def _open_apps(self, icon, item) -> None:
+        threading.Thread(target=self._show_apps, daemon=True).start()
+
+    @staticmethod
+    def _show_apps() -> None:
+        from .apps_window import show_apps
+
+        show_apps()
 
     def _open_settings(self, icon, item) -> None:
         threading.Thread(target=self._show_settings, daemon=True).start()
