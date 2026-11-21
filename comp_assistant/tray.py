@@ -4,13 +4,44 @@ from __future__ import annotations
 import threading
 
 from .config import Settings
+from .microphone import MicrophoneManager
 from .runtime import AssistantRuntime
+from .onecore_synthesizer import OneCoreSpeechSynthesizer
+from .voice import AudioService, MockWakeWordDetector
+from .vosk_recognizer import VoskSpeechRecognizer
 
 
 class CompAssistantApp:
     def __init__(self) -> None:
         self.settings = Settings.load()
-        self.runtime = AssistantRuntime(self.settings.command_wait_seconds)
+        self.microphone_manager = MicrophoneManager(
+            sample_rate=self.settings.sample_rate,
+            channels=self.settings.channels,
+            block_size=self.settings.block_size,
+            input_device=self.settings.input_device,
+            dtype=self.settings.dtype,
+        )
+        self.audio_service = AudioService(
+            MockWakeWordDetector(),
+            VoskSpeechRecognizer(
+                self.microphone_manager,
+                self.settings.vosk_model_directory,
+                sample_rate=self.settings.sample_rate,
+                dtype=self.settings.dtype,
+                channels=self.settings.channels,
+            ),
+            OneCoreSpeechSynthesizer(
+                enabled=self.settings.tts_enabled,
+                voice_id=self.settings.tts_voice_id,
+                rate=self.settings.tts_rate,
+                volume=self.settings.tts_volume,
+            ),
+        )
+        self.runtime = AssistantRuntime(
+            self.settings.command_wait_seconds,
+            audio_service=self.audio_service,
+            microphone_manager=self.microphone_manager,
+        )
         self.icon = None
 
     def run(self) -> None:
@@ -24,6 +55,7 @@ class CompAssistantApp:
             ) from error
 
         menu = pystray.Menu(
+            pystray.MenuItem("Uygulama bul ve aç", self._open_apps),
             pystray.MenuItem("Ayarlar", self._open_settings),
             pystray.MenuItem(
                 "Asistan etkin",
@@ -47,6 +79,15 @@ class CompAssistantApp:
         draw.ellipse((5, 5, 59, 59), fill=(27, 190, 170))
         draw.text((22, 18), "C", fill=(18, 28, 42))
         return image
+
+    def _open_apps(self, icon, item) -> None:
+        threading.Thread(target=self._show_apps, daemon=True).start()
+
+    @staticmethod
+    def _show_apps() -> None:
+        from .apps_window import show_apps
+
+        show_apps()
 
     def _open_settings(self, icon, item) -> None:
         threading.Thread(target=self._show_settings, daemon=True).start()
