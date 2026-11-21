@@ -36,6 +36,7 @@ class SpeechSynthesizer(Protocol):
 
 StateCallback = Callable[[RuntimeState], None]
 CommandHandler = Callable[[str], str | None]
+PlaybackCallback = Callable[[bool], None]
 
 
 class AudioService:
@@ -48,12 +49,14 @@ class AudioService:
         speech_synthesizer: SpeechSynthesizer,
         command_handler: CommandHandler | None = None,
         on_state_change: StateCallback | None = None,
+        on_speech_playback: PlaybackCallback | None = None,
     ) -> None:
         self.wake_word_detector = wake_word_detector
         self.speech_recognizer = speech_recognizer
         self.speech_synthesizer = speech_synthesizer
         self.command_handler = command_handler or (lambda _text: None)
         self.on_state_change = on_state_change or (lambda _state: None)
+        self.on_speech_playback = on_speech_playback or (lambda _active: None)
         self._lock = Lock()
         self._stop_event: Event | None = None
         self._worker: Thread | None = None
@@ -116,7 +119,11 @@ class AudioService:
                 if command and not stop_event.is_set():
                     response = self.command_handler(command)
                     if response and not stop_event.is_set():
-                        self.speech_synthesizer.speak(response, stop_event)
+                        self.on_speech_playback(True)
+                        try:
+                            self.speech_synthesizer.speak(response, stop_event)
+                        finally:
+                            self.on_speech_playback(False)
                 if not stop_event.is_set():
                     self.on_state_change(RuntimeState.STANDBY)
         except Exception:

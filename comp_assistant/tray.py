@@ -6,7 +6,8 @@ import threading
 from .config import Settings
 from .microphone import MicrophoneManager
 from .runtime import AssistantRuntime
-from .voice import AudioService, MockSpeechSynthesizer, MockWakeWordDetector
+from .onecore_synthesizer import OneCoreSpeechSynthesizer
+from .voice import AudioService, MockWakeWordDetector
 from .vosk_recognizer import VoskSpeechRecognizer
 
 
@@ -29,7 +30,12 @@ class CompAssistantApp:
                 dtype=self.settings.dtype,
                 channels=self.settings.channels,
             ),
-            MockSpeechSynthesizer(),
+            OneCoreSpeechSynthesizer(
+                enabled=self.settings.tts_enabled,
+                voice_id=self.settings.tts_voice_id,
+                rate=self.settings.tts_rate,
+                volume=self.settings.tts_volume,
+            ),
         )
         self.runtime = AssistantRuntime(
             self.settings.command_wait_seconds,

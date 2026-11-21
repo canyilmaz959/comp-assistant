@@ -134,11 +134,12 @@ class VoskRecognizerTests(unittest.TestCase):
         handled = []
         states = []
         detector = MockWakeWordDetector()
+        synthesizer = MockSpeechSynthesizer()
         service = AudioService(
             detector,
             self.recognizer,
-            MockSpeechSynthesizer(),
-            command_handler=handled.append,
+            synthesizer,
+            command_handler=lambda text: handled.append(text) or "Türkçe yanıt",
             on_state_change=states.append,
         )
         service.start()
@@ -154,6 +155,7 @@ class VoskRecognizerTests(unittest.TestCase):
                 time.sleep(0.005)
             self.assertEqual(self.partials, ["hei"])
             self.assertEqual(handled, ["hei comp"])
+            self.assertEqual(synthesizer.spoken, ["Türkçe yanıt"])
         finally:
             service.shutdown()
 

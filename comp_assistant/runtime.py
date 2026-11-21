@@ -24,6 +24,7 @@ class AssistantRuntime:
             on_state_change=self._set_audio_state
         )
         self._audio_service.on_state_change = self._set_audio_state
+        self._audio_service.on_speech_playback = self._set_speech_playback
         self._audio_service.start()
 
     @property
@@ -74,6 +75,15 @@ class AssistantRuntime:
         else:
             with self._lock:
                 self._microphone_error = None
+
+    def _set_speech_playback(self, active: bool) -> None:
+        """Keep captured user audio away from speaker playback and Vosk."""
+        if active:
+            with self._lock:
+                if self._state in {RuntimeState.PAUSED, RuntimeState.STOPPED}:
+                    return
+            if self.microphone_manager is not None:
+                self._manage_microphone("stop")
 
     def set_enabled(self, enabled: bool) -> None:
         if enabled:

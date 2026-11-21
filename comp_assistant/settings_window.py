@@ -55,6 +55,10 @@ def show_settings(settings: Settings, on_save: Callable[[Settings], None]) -> No
                 input_device=settings.input_device,
                 dtype=settings.dtype,
                 vosk_model_directory=settings.vosk_model_directory,
+                tts_enabled=settings.tts_enabled,
+                tts_voice_id=settings.tts_voice_id,
+                tts_rate=settings.tts_rate,
+                tts_volume=settings.tts_volume,
             )
             updated.save()
             on_save(updated)

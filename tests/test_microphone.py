@@ -177,6 +177,10 @@ class MicrophoneManagerTests(unittest.TestCase):
                 input_device="USB Mic",
                 dtype="float32",
                 vosk_model_directory="D:/speech/vosk-model-small-tr-0.3",
+                tts_enabled=False,
+                tts_voice_id="sapi://turkish",
+                tts_rate=205,
+                tts_volume=0.65,
             )
             configured.save(path)
             reloaded = Settings.load(path)
@@ -187,6 +191,10 @@ class MicrophoneManagerTests(unittest.TestCase):
         self.assertEqual(reloaded.input_device, "USB Mic")
         self.assertEqual(reloaded.dtype, "float32")
         self.assertEqual(reloaded.vosk_model_directory, "D:/speech/vosk-model-small-tr-0.3")
+        self.assertFalse(reloaded.tts_enabled)
+        self.assertEqual(reloaded.tts_voice_id, "sapi://turkish")
+        self.assertEqual(reloaded.tts_rate, 205)
+        self.assertEqual(reloaded.tts_volume, 0.65)
 
 
 class RuntimeMicrophoneLifecycleTests(unittest.TestCase):

@@ -2,3 +2,7 @@ pystray>=0.19.5
 Pillow>=10.0
 sounddevice>=0.5.1
 vosk>=0.3.45
+winrt-runtime>=4.0.0; platform_system == "Windows"
+winrt-Windows.Media.Core>=4.0.0; platform_system == "Windows"
+winrt-Windows.Media.Playback>=4.0.0; platform_system == "Windows"
+winrt-Windows.Media.SpeechSynthesis>=4.0.0; platform_system == "Windows"
